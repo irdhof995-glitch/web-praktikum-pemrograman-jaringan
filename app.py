@@ -1,14 +1,28 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Di sini kita bilang: "Tolong ambil kunci dari brankas rahasia"
+# 1. Ambil Kunci Rahasia
 kunci_rahasia = st.secrets["GOOGLE_API_KEY"]
 genai.configure(api_key=kunci_rahasia)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-st.title("Aplikasi AI Saya")
-pesan = st.text_input("Mau tanya apa hari ini?")
+# 2. Tampilan Web
+st.title("🤖 Asisten AI Saya")
+st.write("Halo! Silahkan ketik pertanyaanmu di bawah ini.")
 
-if st.button("Kirim"):
-    respon = model.generate_content(pesan)
-    st.write(respon.text)
+# Input teks dari user
+pesan = st.text_input("Pertanyaan kamu:", placeholder="Contoh: Apa itu kecerdasan buatan?")
+
+# 3. Logika: Kirim HANYA jika tombol diklik
+if st.button("Tanya Sekarang"):
+    if pesan: # Cek apakah pesan tidak kosong
+        with st.spinner("Sedang memikirkan jawaban..."):
+            try:
+                respon = model.generate_content(pesan)
+                st.subheader("Jawaban AI:")
+                st.write(respon.text)
+            except Exception as e:
+                st.error(f"Aduh, ada masalah teknis: {e}")
+    else:
+        # Jika user klik tombol tapi belum ngetik apa-apa
+        st.warning("Eits, ketik dulu pertanyaannya ya!")
