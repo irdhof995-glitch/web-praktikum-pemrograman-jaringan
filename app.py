@@ -1,33 +1,38 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Pastikan nama di Secrets adalah GOOGLE_API_KEY
+# --- 1. SETTING HALAMAN ---
+st.set_page_config(page_title="Asisten AI Saya", page_icon="🤖")
+
+# --- 2. KONEKSI KE GOOGLE AI ---
 try:
-    kunci_rahasia = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=kunci_rahasia)
+    # Mengambil kunci dari Secrets Streamlit
+    kunci = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=kunci)
     
-    # Kita gunakan nama model yang paling stabil
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # Gunakan nama model 'gemini-pro' (paling stabil untuk pemula)
+    model = genai.GenerativeModel('gemini-pro')
 except Exception as e:
-    st.error(f"Gagal memuat API Key: {e}")
+    st.error(f"Kunci API belum siap: {e}")
 
-st.set_page_config(page_title="Asisten AI Saya")
-st.title("🤖 Asisten AI Saya")
-st.write("Silahkan ketik pertanyaanmu di bawah ini.")
+# --- 3. TAMPILAN ---
+st.title("🤖 Chatbot AI Saya")
+st.info("Tanyakan apa saja, saya akan menjawab menggunakan Google Gemini.")
 
-pesan = st.text_input("Pertanyaan kamu:", placeholder="Contoh: Apa itu kecerdasan buatan?")
+pesan = st.text_input("Ketik pertanyaan kamu di sini:", placeholder="Contoh: Apa itu internet?")
 
 if st.button("Tanya Sekarang"):
     if pesan:
-        with st.spinner("Sedang memikirkan jawaban..."):
+        with st.spinner("Sabar ya, lagi mikir..."):
             try:
-                # Tambahkan penanganan jika model tidak ditemukan
+                # Proses tanya ke AI
                 respon = model.generate_content(pesan)
-                st.subheader("Jawaban AI:")
-                st.write(respon.text)
+                
+                # Tampilkan hasil
+                st.subheader("Jawaban:")
+                st.markdown(f"> {respon.text}")
             except Exception as e:
-                # Jika masih error 404, coba ganti model ke 'gemini-pro'
-                st.error(f"Maaf, ada masalah: {e}")
-                st.info("Tips: Pastikan API Key di 'Secrets' sudah benar dan aktif.")
+                st.error(f"Terjadi kendala: {e}")
+                st.info("Pastikan API Key di 'Secrets' Streamlit sudah benar.")
     else:
-        st.warning("Ketik dulu pertanyaannya ya!")
+        st.warning("Kolomnya jangan dikosongin ya!")
