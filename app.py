@@ -1,28 +1,33 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Ambil Kunci Rahasia
-kunci_rahasia = st.secrets["GOOGLE_API_KEY"]
-genai.configure(api_key=kunci_rahasia)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Pastikan nama di Secrets adalah GOOGLE_API_KEY
+try:
+    kunci_rahasia = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=kunci_rahasia)
+    
+    # Kita gunakan nama model yang paling stabil
+    model = genai.GenerativeModel('gemini-1.5-flash')
+except Exception as e:
+    st.error(f"Gagal memuat API Key: {e}")
 
-# 2. Tampilan Web
+st.set_page_config(page_title="Asisten AI Saya")
 st.title("🤖 Asisten AI Saya")
-st.write("Halo! Silahkan ketik pertanyaanmu di bawah ini.")
+st.write("Silahkan ketik pertanyaanmu di bawah ini.")
 
-# Input teks dari user
 pesan = st.text_input("Pertanyaan kamu:", placeholder="Contoh: Apa itu kecerdasan buatan?")
 
-# 3. Logika: Kirim HANYA jika tombol diklik
 if st.button("Tanya Sekarang"):
-    if pesan: # Cek apakah pesan tidak kosong
+    if pesan:
         with st.spinner("Sedang memikirkan jawaban..."):
             try:
+                # Tambahkan penanganan jika model tidak ditemukan
                 respon = model.generate_content(pesan)
                 st.subheader("Jawaban AI:")
                 st.write(respon.text)
             except Exception as e:
-                st.error(f"Aduh, ada masalah teknis: {e}")
+                # Jika masih error 404, coba ganti model ke 'gemini-pro'
+                st.error(f"Maaf, ada masalah: {e}")
+                st.info("Tips: Pastikan API Key di 'Secrets' sudah benar dan aktif.")
     else:
-        # Jika user klik tombol tapi belum ngetik apa-apa
-        st.warning("Eits, ketik dulu pertanyaannya ya!")
+        st.warning("Ketik dulu pertanyaannya ya!")
